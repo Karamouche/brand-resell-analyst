@@ -5,10 +5,13 @@ import bs4
 import time
 import requests
 import pandas as pd
+from concurrent.futures import ThreadPoolExecutor
 
 # constants
 SAMPLE_SIZE = 400
 BROWSER = "firefox"
+ISMULTITHREAD = True
+THREADS = 4
 
 def setup_driver(headless=False):
 	options = webdriver.FirefoxOptions() if BROWSER == "firefox" else webdriver.ChromeOptions()
@@ -39,8 +42,8 @@ def fetch_items(brand_link):
 	driver = setup_driver(True)
 	driver.get(brand_link)
 	try:
-		time.sleep(2)
 		driver.find_element(By.ID, "onetrust-accept-btn-handler").click()
+		time.sleep(2)
 	except:
 		pass
 
@@ -64,28 +67,25 @@ def fetch_items(brand_link):
 		if percent > 100:
 			percent = 100
 		print("{:.2f}%".format(percent))
-
+		time.sleep(1)
 		driver.find_element(By.CLASS_NAME, "web_ui__Pagination__next").click()
-		time.sleep(4)
+		time.sleep(1)
 	driver.close()
 	return links
 
-def get_items_info(items_link):
-	driver = setup_driver(True)
+
+def get_items_info(items_link, driver):
 	items = list()
-	print("Fetching items info...")
 	for link in items_link:
-		print("{:.2f}%".format(items_link.index(link)+1 / len(items_link) * 100))
+		print(items_link.index(link)+1, "/", len(items_link))
 		driver.get(link)
 		try:
-			time.sleep(2)
 			driver.find_element(By.ID, "onetrust-accept-btn-handler").click()
+			time.sleep(2)
 		except:
 			pass
-		time.sleep(2)
 		item = {}
 		try:
-			print(driver.find_element(By.CLASS_NAME, "details-list--info").find_element(By.TAG_NAME, "h2").text)
 			item['name'] = driver.find_element(By.CLASS_NAME, "details-list--info").find_element(By.TAG_NAME, "h2").text
 		except:
 			pass
@@ -94,7 +94,6 @@ def get_items_info(items_link):
 		try:
 			types = driver.find_element(By.XPATH, "/html/body/main/div/section/div/main/div/section[2]/div/div[1]/nav").find_elements(By.TAG_NAME, "a")
 			item['category'] = types[len(types)-2].text
-			item['sub_category'] = types[len(types)-1].text
 
 			item['price'] = driver.find_element(By.TAG_NAME, "h1").text.replace(' €', '').replace(',', '.')
 			item['price'] = float(item['price'])
@@ -111,10 +110,8 @@ def get_items_info(items_link):
 			pass
 
 		items.append(item)
-
-	driver.close()
 	return items
-	
+
 
 def main():
 	# open brands.xml
@@ -129,11 +126,23 @@ def main():
 		print("Brand not found. Please retry.")
 		return
 	brand_link = brands['link'][brands['name'].index(brand_name)].text
+	del brands
 	items = fetch_items(brand_link)
 	print("Fetching items info...")
-	items_data = get_items_info(items[:30])
 	
-	df = pd.DataFrame(items_data)
+	if ISMULTITHREAD:
+		chunks = [items[i::THREADS] for i in range(THREADS)]
+		drivers = [setup_driver(True) for i in range(THREADS)]
+		with ThreadPoolExecutor(max_workers=THREADS) as executor:
+			futures = executor.map(get_items_info, chunks, drivers)
+			result = list(futures)
+		[driver.quit() for driver in drivers]
+		result = [item for sublist in result for item in sublist]
+	else:
+		driver = setup_driver(True)
+		result = get_items_info(items, driver)
+		driver.quit()
+	df = pd.DataFrame(result)
 	df.to_csv('{}_items.csv'.format(brand_name), index=False)
 	print(df.head(5))
 	

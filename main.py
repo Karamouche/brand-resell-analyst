@@ -14,6 +14,7 @@ def setup_driver(headless=False):
 	options = webdriver.FirefoxOptions() if BROWSER == "firefox" else webdriver.ChromeOptions()
 	if headless:
 		options.add_argument("--headless")
+	options.add_argument("--no-sandbox")
 	if BROWSER == "firefox":
 		driver = webdriver.Firefox(options=options)
 	elif BROWSER == "chrome":
@@ -130,7 +131,7 @@ def main():
 	brand_link = brands['link'][brands['name'].index(brand_name)].text
 	items = fetch_items(brand_link)
 	print("Fetching items info...")
-	items_data = get_items_info(items[:100])
+	items_data = get_items_info(items[:30])
 	
 	df = pd.DataFrame(items_data)
 	df.to_csv('{}_items.csv'.format(brand_name), index=False)

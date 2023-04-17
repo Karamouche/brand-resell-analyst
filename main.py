@@ -89,7 +89,15 @@ def get_items_info(items_link, driver):
 		wait = WebDriverWait(driver, 10)
 		wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
 		print(items_link.index(link)+1, "/", len(items_link))
-		driver.get(link)
+		# reload page until it loads 
+		while True:
+			try:
+				driver.get(link)
+				wait.until(EC.presence_of_element_located((By.CLASS_NAME, "details-list--details")))
+				break
+			except:
+				pass
+		item_details = driver.find_element(By.CLASS_NAME, "details-list--details").find_elements(By.CLASS_NAME, "details-list__item")
 		item = {}
 		try:
 			item['name'] = driver.find_element(By.CLASS_NAME, "details-list--info").find_element(By.TAG_NAME, "h2").text
@@ -109,7 +117,6 @@ def get_items_info(items_link, driver):
 		except:
 			pass
 
-		item_details = driver.find_element(By.CLASS_NAME, "details-list--details").find_elements(By.CLASS_NAME, "details-list__item")
 		for detail in item_details:
 			if "TAILLE" in detail.text or "SIZE" in detail.text:
 				size = detail.find_element(By.CLASS_NAME, "details-list__item-value").text

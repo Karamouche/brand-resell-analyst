@@ -8,6 +8,8 @@ import time
 import requests
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor
+import random
+from fake_useragent import UserAgent
 
 # constants
 SAMPLE_SIZE = 200
@@ -17,9 +19,12 @@ THREADS = 4
 
 def setup_driver(headless=False):
 	options = webdriver.FirefoxOptions() if BROWSER == "firefox" else webdriver.ChromeOptions()
+	ua = UserAgent()
 	if headless:
 		options.add_argument("--headless")
 	options.add_argument("--no-sandbox")
+	options.add_argument("--window-size=1920,1080")
+	options.add_argument(f"user-agent={ua.random}")
 	if BROWSER == "firefox":
 		driver = webdriver.Firefox(options=options)
 	elif BROWSER == "chrome":
@@ -41,7 +46,7 @@ def get_brands(brands_file):
 
 
 def fetch_items(brand_link):
-	driver = setup_driver(True)
+	driver = setup_driver(False)
 	driver.get(brand_link)
 	wait = WebDriverWait(driver, 10)
 	wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
@@ -133,6 +138,7 @@ def get_items_info(items_link, driver):
 
 
 def main():
+	print("Welcome to resell analysis tool")
 	# open brands.xml
 	with open('brands.xml', 'r') as f:
 		brands_file = bs4.BeautifulSoup(f.read(), 'xml')

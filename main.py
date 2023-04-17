@@ -46,7 +46,7 @@ def get_brands(brands_file):
 
 
 def fetch_items(brand_link):
-	driver = setup_driver(True)
+	driver = setup_driver(False)
 	driver.get(brand_link)
 	wait = WebDriverWait(driver, 10)
 	wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
@@ -59,9 +59,9 @@ def fetch_items(brand_link):
 	links = []
 	print("Fetching items links...")
 	while len(links) < SAMPLE_SIZE: # get items links
-		wait.until(EC.presence_of_element_located((By.CLASS_NAME, "feed-grid")))
+		time.sleep(1)
 		grid = driver.find_element(By.CLASS_NAME, "feed-grid")
-		items = driver.find_elements(By.CLASS_NAME, "web_ui__ItemBox__image-container")
+		items = grid.find_elements(By.CLASS_NAME, "web_ui__ItemBox__image-container")
 		links_page = [item.find_element(By.TAG_NAME, "a").get_attribute("href") for item in items]
 		try:
 			closet = driver.find_element(By.CLASS_NAME, "closet-container")
@@ -78,8 +78,7 @@ def fetch_items(brand_link):
 			print("100%")
 			break
 		print("{:.2f}%".format(len(links)/SAMPLE_SIZE*100))
-		wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "web_ui__Pagination__next"))).click()
-		#driver.find_element(By.CSS_SELECTOR, "a.web_ui__Pagination__next").click()
+		wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "a.web_ui__Pagination__next"))).click()
 	driver.close()
 	return links
 

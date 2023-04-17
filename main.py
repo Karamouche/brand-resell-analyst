@@ -59,6 +59,7 @@ def fetch_items(brand_link):
 	links = []
 	print("Fetching items links...")
 	while len(links) < SAMPLE_SIZE: # get items links
+		wait.until(EC.presence_of_element_located((By.CLASS_NAME, "feed-grid")))
 		grid = driver.find_element(By.CLASS_NAME, "feed-grid")
 		items = driver.find_elements(By.CLASS_NAME, "web_ui__ItemBox__image-container")
 		links_page = [item.find_element(By.TAG_NAME, "a").get_attribute("href") for item in items]

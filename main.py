@@ -46,7 +46,7 @@ def get_brands(brands_file):
 
 
 def fetch_items(brand_link):
-	driver = setup_driver(False)
+	driver = setup_driver(True)
 	driver.get(brand_link)
 	wait = WebDriverWait(driver, 10)
 	wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))

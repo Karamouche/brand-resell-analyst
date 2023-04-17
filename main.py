@@ -1,6 +1,8 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import bs4
 import time
 import requests
@@ -8,7 +10,7 @@ import pandas as pd
 from concurrent.futures import ThreadPoolExecutor
 
 # constants
-SAMPLE_SIZE = 400
+SAMPLE_SIZE = 200
 BROWSER = "firefox"
 ISMULTITHREAD = True
 THREADS = 4
@@ -41,8 +43,10 @@ def get_brands(brands_file):
 def fetch_items(brand_link):
 	driver = setup_driver(True)
 	driver.get(brand_link)
+	wait = WebDriverWait(driver, 10)
+	wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
 	try:
-		driver.find_element(By.ID, "onetrust-accept-btn-handler").click()
+		wait.until(EC.element_to_be_clickable((By.ID, "onetrust-accept-btn-handler"))).click()
 		time.sleep(2)
 	except:
 		pass
@@ -53,23 +57,23 @@ def fetch_items(brand_link):
 		grid = driver.find_element(By.CLASS_NAME, "feed-grid")
 		items = driver.find_elements(By.CLASS_NAME, "web_ui__ItemBox__image-container")
 		links_page = [item.find_element(By.TAG_NAME, "a").get_attribute("href") for item in items]
+		try:
+			closet = driver.find_element(By.CLASS_NAME, "closet-container")
+			closet = closet.find_elements(By.CLASS_NAME, "web_ui__ItemBox__image-container")
+			closet_link = [item.find_element(By.TAG_NAME, "a").get_attribute("href") for item in closet]
 
-		closet = driver.find_element(By.CLASS_NAME, "closet-container")
-		closet = closet.find_elements(By.CLASS_NAME, "web_ui__ItemBox__image-container")
-		closet_link = [item.find_element(By.TAG_NAME, "a").get_attribute("href") for item in closet]
-
-		for element in links_page:
-			if element in closet_link:
-				links_page.remove(element)
+			for element in links_page:
+				if element in closet_link:
+					links_page.remove(element)
+		except:
+			pass
 		links += links_page
-
-		percent = len(links)/SAMPLE_SIZE*100
-		if percent > 100:
-			percent = 100
-		print("{:.2f}%".format(percent))
-		time.sleep(1)
-		driver.find_element(By.CLASS_NAME, "web_ui__Pagination__next").click()
-		time.sleep(1)
+		if len(links) >= SAMPLE_SIZE:
+			print("100%")
+			break
+		print("{:.2f}%".format(len(links)/SAMPLE_SIZE*100))
+		wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "web_ui__Pagination__next"))).click()
+		#driver.find_element(By.CSS_SELECTOR, "a.web_ui__Pagination__next").click()
 	driver.close()
 	return links
 
@@ -77,13 +81,10 @@ def fetch_items(brand_link):
 def get_items_info(items_link, driver):
 	items = list()
 	for link in items_link:
+		wait = WebDriverWait(driver, 10)
+		wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
 		print(items_link.index(link)+1, "/", len(items_link))
 		driver.get(link)
-		try:
-			driver.find_element(By.ID, "onetrust-accept-btn-handler").click()
-			time.sleep(2)
-		except:
-			pass
 		item = {}
 		try:
 			item['name'] = driver.find_element(By.CLASS_NAME, "details-list--info").find_element(By.TAG_NAME, "h2").text
@@ -94,21 +95,39 @@ def get_items_info(items_link, driver):
 		try:
 			types = driver.find_element(By.XPATH, "/html/body/main/div/section/div/main/div/section[2]/div/div[1]/nav").find_elements(By.TAG_NAME, "a")
 			item['category'] = types[len(types)-2].text
-
+		except:
+			pass
+		
+		try:
 			item['price'] = driver.find_element(By.TAG_NAME, "h1").text.replace(' €', '').replace(',', '.')
 			item['price'] = float(item['price'])
-
-			item_details = driver.find_element(By.CLASS_NAME, "details-list--details").find_elements(By.CLASS_NAME, "details-list__item")
-
-			size = item_details[1].find_element(By.CLASS_NAME, "details-list__item-value").text
-			item['size'] = size.split("\n")[0]
-
-			condition = item_details[2].find_element(By.CLASS_NAME, "details-list__item-value").text
-			item['condition'] = condition.split("\n")[0]
-			item['color'] = item_details[3].find_element(By.CLASS_NAME, "details-list__item-value").text
 		except:
 			pass
 
+		item_details = driver.find_element(By.CLASS_NAME, "details-list--details").find_elements(By.CLASS_NAME, "details-list__item")
+		for detail in item_details:
+			if "TAILLE" in detail.text or "SIZE" in detail.text:
+				size = detail.find_element(By.CLASS_NAME, "details-list__item-value").text
+				size = size.split("\n")[0]
+				item['size'] = size
+			elif "ÉTAT" in detail.text or "CONDITION" in detail.text:
+				condition = detail.find_element(By.CLASS_NAME, "details-list__item-value").text
+				condition = condition.split("\n")[0]
+				item['condition'] = condition
+			elif "COULEUR" in detail.text or "COLOUR" in detail.text:
+				color = detail.find_element(By.CLASS_NAME, "details-list__item-value").text
+				color = color.split("\n")[0]
+				item['color'] = color
+			elif "NOMBRE DE VUES" in detail.text or "VIEWS" in detail.text:
+				views = detail.find_element(By.CLASS_NAME, "details-list__item-value").text
+				views = views.split(" ")[-1]
+				views = int(views)
+				item['views'] = views
+			elif "INTÉRESSÉS·ÉES" in detail.text or "INTERESTED" in detail.text:
+				interested = detail.find_element(By.CLASS_NAME, "details-list__item-value").text
+				interested = interested.split(" ")[0]
+				interested = int(interested)
+				item['interested'] = interested
 		items.append(item)
 	return items
 
@@ -136,8 +155,8 @@ def main():
 		with ThreadPoolExecutor(max_workers=THREADS) as executor:
 			futures = executor.map(get_items_info, chunks, drivers)
 			result = list(futures)
-		[driver.quit() for driver in drivers]
 		result = [item for sublist in result for item in sublist]
+		[driver.close() for driver in drivers]
 	else:
 		driver = setup_driver(True)
 		result = get_items_info(items, driver)

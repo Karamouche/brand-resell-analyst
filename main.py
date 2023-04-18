@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
 import bs4
 import time
 import requests
@@ -13,7 +14,7 @@ from fake_useragent import UserAgent
 import uuid
 
 # constants
-SAMPLE_SIZE = 200
+SAMPLE_SIZE = 8000
 BROWSER = "firefox"
 ISMULTITHREAD = True
 THREADS = 4
@@ -80,8 +81,11 @@ def fetch_items(brand_link):
 			print("100%")
 			break
 		print("{:.2f}%".format(len(links)/SAMPLE_SIZE*100))
-		wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "a.web_ui__Pagination__next")))
-		driver.find_element(By.CSS_SELECTOR, "a.web_ui__Pagination__next").click()
+		# prevent from trying to click on the next page button while it's obscured by the footer
+		next_page = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "a.web_ui__Pagination__next")))
+		driver.execute_script("arguments[0].scrollIntoView();", next_page)
+		actions = ActionChains(driver)
+		actions.move_to_element(next_page).click().perform()
 	driver.close()
 	return links
 

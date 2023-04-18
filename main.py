@@ -103,15 +103,16 @@ def get_items_info(items_link, driver):
 				break
 			except:
 				if not is_blocked:
-					print("Wainting {} to be unblocked...".format(thread_id))
+					print("Waiting {} to be unblocked...".format(thread_id))
 				is_blocked = True
 				pass
-		print("{} is fetching item {}/{}".format(thread_id, len(items), len(items_link)))
+		print("{} is fetching item {}/{}".format(thread_id, len(items)+1, len(items_link)))
 		item_details = driver.find_element(By.CLASS_NAME, "details-list--details").find_elements(By.CLASS_NAME, "details-list__item")
 		item = {}
 		try:
 			item['name'] = driver.find_element(By.CLASS_NAME, "details-list--info").find_element(By.TAG_NAME, "h2").text
 		except:
+			print("No name found for {}".format(thread_id))
 			pass
 
 		item['link'] = link
@@ -119,12 +120,14 @@ def get_items_info(items_link, driver):
 			types = driver.find_element(By.XPATH, "/html/body/main/div/section/div/main/div/section[2]/div/div[1]/nav").find_elements(By.TAG_NAME, "a")
 			item['category'] = types[len(types)-2].text
 		except:
+			print("No category found for {}".format(thread_id))
 			pass
 		
 		try:
 			item['price'] = driver.find_element(By.TAG_NAME, "h1").text.replace(' €', '').replace(',', '.')
 			item['price'] = float(item['price'])
 		except:
+			print("No price found for {}".format(thread_id))
 			pass
 
 		for detail in item_details:

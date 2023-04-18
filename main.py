@@ -49,7 +49,6 @@ def get_brands(brands_file):
 def fetch_items(brand_link):
 	driver = setup_driver(True)
 	driver.get(brand_link)
-	thread_uuid = uuid.uuid4()
 	wait = WebDriverWait(driver, 10)
 	wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
 	try:
@@ -79,7 +78,7 @@ def fetch_items(brand_link):
 		if len(links) >= SAMPLE_SIZE:
 			print("100%")
 			break
-		print("{} - {:.2f}%".format(thread_uuid, len(links)/SAMPLE_SIZE*100))
+		print("{:.2f}%".format(len(links)/SAMPLE_SIZE*100))
 		wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "a.web_ui__Pagination__next"))).click()
 	driver.close()
 	return links
@@ -87,10 +86,11 @@ def fetch_items(brand_link):
 
 def get_items_info(items_link, driver):
 	items = list()
+	thread_uuid = uuid.uuid4()
 	for link in items_link:
 		wait = WebDriverWait(driver, 10)
 		wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-		print(items_link.index(link)+1, "/", len(items_link))
+		print(thread_uuid+" - "+items_link.index(link)+1, "/", len(items_link))
 		# reload page until it loads 
 		while True:
 			try:

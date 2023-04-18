@@ -11,10 +11,10 @@ from concurrent.futures import ThreadPoolExecutor
 from fake_useragent import UserAgent
 
 # constants
-SAMPLE_SIZE = 8000
+SAMPLE_SIZE = 200
 BROWSER = "firefox"
 ISMULTITHREAD = True
-THREADS = 8
+THREADS = 4
 
 def setup_driver(headless=False):
 	options = webdriver.FirefoxOptions() if BROWSER == "firefox" else webdriver.ChromeOptions()
@@ -89,11 +89,10 @@ def fetch_items(brand_link):
 
 def get_items_info(items_link, driver):
 	items = list()
-	thread_id = driver.session_id[:2]
+	thread_id = driver.session_id[:4]
+	print("Thread {} started".format(thread_id))
+	wait = WebDriverWait(driver, 4)
 	for link in items_link:
-		wait = WebDriverWait(driver, 10)
-		wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-		print("{} - {}/{}".format(thread_id, items_link.index(link)+1, len(items_link)))
 		# reload page until it loads 
 		while True:
 			try:
@@ -101,7 +100,9 @@ def get_items_info(items_link, driver):
 				wait.until(EC.presence_of_element_located((By.CLASS_NAME, "details-list--details")))
 				break
 			except:
+				print("Wainting {} to be unblocked...".format(thread_id))
 				pass
+		print("{} is fetching item {}/{}".format(thread_id, len(items), len(items_link)))
 		item_details = driver.find_element(By.CLASS_NAME, "details-list--details").find_elements(By.CLASS_NAME, "details-list__item")
 		item = {}
 		try:
@@ -180,7 +181,7 @@ def main():
 		result = get_items_info(items, driver)
 		driver.quit()
 	df = pd.DataFrame(result)
-	df.to_csv('{}_items.csv'.format(brand_name), index=False)
+	df.to_csv('{}_items.csv'.format(brand_name.replace(" ", "_")), index=False)
 	print(df.head(5))
 	
 

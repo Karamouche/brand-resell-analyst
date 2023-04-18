@@ -6,12 +6,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 import bs4
 import time
-import requests
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor
-import random
 from fake_useragent import UserAgent
-import uuid
 
 # constants
 SAMPLE_SIZE = 8000
@@ -92,11 +89,11 @@ def fetch_items(brand_link):
 
 def get_items_info(items_link, driver):
 	items = list()
-	thread_uuid = str(uuid.uuid4())
+	thread_id = driver.session_id[:2]
 	for link in items_link:
 		wait = WebDriverWait(driver, 10)
 		wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-		print(thread_uuid+" - "+items_link.index(link)+1, "/", len(items_link))
+		print("{} - {}/{}".format(thread_id, items_link.index(link)+1, len(items_link)))
 		# reload page until it loads 
 		while True:
 			try:

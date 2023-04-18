@@ -92,15 +92,19 @@ def get_items_info(items_link, driver):
 	thread_id = driver.session_id[:4]
 	print("Thread {} started".format(thread_id))
 	wait = WebDriverWait(driver, 4)
+	is_blocked = False
 	for link in items_link:
 		# reload page until it loads 
 		while True:
 			try:
 				driver.get(link)
 				wait.until(EC.presence_of_element_located((By.CLASS_NAME, "details-list--details")))
+				is_blocked = False
 				break
 			except:
-				print("Wainting {} to be unblocked...".format(thread_id))
+				if not is_blocked:
+					print("Wainting {} to be unblocked...".format(thread_id))
+				is_blocked = True
 				pass
 		print("{} is fetching item {}/{}".format(thread_id, len(items), len(items_link)))
 		item_details = driver.find_element(By.CLASS_NAME, "details-list--details").find_elements(By.CLASS_NAME, "details-list__item")

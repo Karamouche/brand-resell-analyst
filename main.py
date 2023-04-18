@@ -52,7 +52,8 @@ def fetch_items(brand_link):
 	wait = WebDriverWait(driver, 10)
 	wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
 	try:
-		wait.until(EC.element_to_be_clickable((By.ID, "onetrust-accept-btn-handler"))).click()
+		wait.until(EC.element_to_be_clickable((By.ID, "onetrust-accept-btn-handler")))
+		driver.find_element(By.ID, "onetrust-accept-btn-handler").click()
 		time.sleep(2)
 	except:
 		pass
@@ -79,7 +80,8 @@ def fetch_items(brand_link):
 			print("100%")
 			break
 		print("{:.2f}%".format(len(links)/SAMPLE_SIZE*100))
-		wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "a.web_ui__Pagination__next"))).click()
+		wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "a.web_ui__Pagination__next")))
+		driver.find_element(By.CSS_SELECTOR, "a.web_ui__Pagination__next").click()
 	driver.close()
 	return links
 

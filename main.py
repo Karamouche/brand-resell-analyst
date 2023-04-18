@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from fake_useragent import UserAgent
 
 # constants
-SAMPLE_SIZE = 200
+SAMPLE_SIZE = 50
 BROWSER = "firefox"
 ISMULTITHREAD = True
 THREADS = 4
@@ -118,8 +118,8 @@ def get_items_info(items_link, driver):
 		item['link'] = link
 		try:
 			types = driver.find_element(By.XPATH, "/html/body/main/div/section/div/main/div/section[2]/div/div[1]/nav").find_elements(By.TAG_NAME, "a")
-			item['category'] = types[len(types)-2].text
-			item['subcategory'] = types[len(types)-3].text
+			item['category'] = types[-3].text
+			item['subcategory'] = types[-2].text
 		except:
 			print("No category found for {}".format(thread_id))
 			pass

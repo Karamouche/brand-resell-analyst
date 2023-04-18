@@ -17,7 +17,7 @@ import uuid
 SAMPLE_SIZE = 8000
 BROWSER = "firefox"
 ISMULTITHREAD = True
-THREADS = 4
+THREADS = 8
 
 def setup_driver(headless=False):
 	options = webdriver.FirefoxOptions() if BROWSER == "firefox" else webdriver.ChromeOptions()
@@ -92,7 +92,7 @@ def fetch_items(brand_link):
 
 def get_items_info(items_link, driver):
 	items = list()
-	thread_uuid = uuid.uuid4()
+	thread_uuid = str(uuid.uuid4())
 	for link in items_link:
 		wait = WebDriverWait(driver, 10)
 		wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))

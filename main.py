@@ -119,6 +119,7 @@ def get_items_info(items_link, driver):
 		try:
 			types = driver.find_element(By.XPATH, "/html/body/main/div/section/div/main/div/section[2]/div/div[1]/nav").find_elements(By.TAG_NAME, "a")
 			item['category'] = types[len(types)-2].text
+			item['subcategory'] = types[len(types)-3].text
 		except:
 			print("No category found for {}".format(thread_id))
 			pass

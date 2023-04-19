@@ -2,5 +2,8 @@
 sitemap_vinted.xml
 geckodriver.log
 adidas_items2.csv
+brands.xml
+main.py
+venv
 .idea
 __pycache__

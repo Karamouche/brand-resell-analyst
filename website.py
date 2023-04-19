@@ -3,7 +3,7 @@ from pandas import read_csv
 from graph_builder import bar_chart, pie_chart, histogram, scatter_chart
 
 # Load data
-adidas_df = read_csv('adidas_items3.csv')
+adidas_df = read_csv('zara_items2.csv')
 
 app = Dash(__name__)
 

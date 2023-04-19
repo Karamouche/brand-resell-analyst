@@ -3,3 +3,4 @@ sitemap_vinted.xml
 geckodriver.log
 adidas_items2.csv
 .idea
+__pycache__

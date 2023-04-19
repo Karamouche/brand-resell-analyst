@@ -6,7 +6,6 @@ colors = {
     'background': '#161a1d',
     'text': 'rgb(184, 184, 184)',
     'trace1': '#119dff',
-    'trace2': '#1D9F65',
 }
 
 
@@ -24,6 +23,7 @@ def figure_layout(figure, title, xaxis, yaxis):
         title=title,
         xaxis_title=xaxis,
         yaxis_title=yaxis if yaxis else None,
+        margin=dict(l=80, r=80, t=120, b=0),
     )
 
 
@@ -67,8 +67,9 @@ def histogram(x, x_name, bar_title):
     return figure
 
 
-def scatter_chart(dataframe, x, y, name, color, size, scatter_title, x_name, y_name, ):
+def scatter_chart(dataframe, x, y, name, color, size, scatter_title, x_name, y_name):
     figure = scatter(data_frame=dataframe, x=x, y=y, hover_name=name, color=color, size=size, title=scatter_title,
                      size_max=55, log_x=True)
     figure_layout(figure, scatter_title, x_name, y_name)
     return figure
+

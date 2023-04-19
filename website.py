@@ -16,10 +16,10 @@ app.layout = html.Div(children=[
         dcc.Dropdown(
             id='dropdown',
             options=[
-                {'label': 'Bar', 'value': 'bar'},
-                {'label': 'Pie', 'value': 'pie'},
-                {'label': 'Histogram', 'value': 'histogram'},
-                {'label': 'Scatter', 'value': 'scatter'}
+                {'label': 'Pricing', 'value': 'bar'},
+                {'label': 'Views per category', 'value': 'pie'},
+                {'label': 'Items per category', 'value': 'histogram'},
+                {'label': 'Views and likes linked to price', 'value': 'scatter'}
             ],
             value='bar',
             searchable=False
@@ -38,11 +38,11 @@ app.layout = html.Div(children=[
 )
 def update_graph(dropdown_value):
     if dropdown_value == 'bar':
-        return bar_chart(adidas_df.subcategory.unique(), adidas_df.price,
+        return bar_chart(adidas_df.groupby('subcategory'), adidas_df.groupby('subcategory').price.mean(),
                          'Categories', 'Prices', 'Pricing')
     elif dropdown_value == 'pie':
         return pie_chart(adidas_df.subcategory, adidas_df.views,
-                         'Views per categories')
+                         'Views per category')
     elif dropdown_value == 'histogram':
         return histogram(adidas_df.subcategory,
                          'Categories', 'Items per categories')

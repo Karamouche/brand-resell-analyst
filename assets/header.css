@@ -8,12 +8,12 @@
 }
 
 .dropdownMenu{
+    width: 20%;
     margin: auto;
     font-size: 18px;
     padding-left: 20px;
     flex: 1;
     text-align: center;
-
 
 }
 
@@ -26,4 +26,15 @@ Label{
     flex: 1;
     text-align: center;
     display: block;
+}
+
+
+.axis_selector_div{
+    width: 15%;
+    display: inline-block;
+
+}
+.RadioItems{
+    margin: auto;
+    text-align: center;
 }

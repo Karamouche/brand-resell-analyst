@@ -23,7 +23,7 @@ def figure_layout(figure, title, xaxis, yaxis):
         title=title,
         xaxis_title=xaxis,
         yaxis_title=yaxis if yaxis else None,
-        margin=dict(l=80, r=80, t=120, b=0),
+        margin=dict(l=80, r=80, t=120, b=40),
     )
 
 

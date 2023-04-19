@@ -1,9 +1,5 @@
-
-sitemap_vinted.xml
-geckodriver.log
-adidas_items3.csv
-brands.xml
-main.py
+.venv
 venv
 .idea
 __pycache__
+*.ipynb

@@ -1,0 +1,12 @@
+body {
+    font-family: Century Gothic,CenturyGothic,AppleGothic,sans-serif;
+    background-color: #161a1d;
+
+}
+h1, h2, h3, h4, h5, h6 {
+    color: rgb(16, 161, 236);
+}
+
+Label{
+    color: rgb(184, 184, 184);
+}

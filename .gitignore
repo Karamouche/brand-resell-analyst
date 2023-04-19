@@ -1,4 +1,5 @@
 
 sitemap_vinted.xml
 geckodriver.log
-*.csv
+adidas_items2.csv
+.idea

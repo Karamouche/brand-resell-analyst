@@ -5,8 +5,7 @@ It uses the vinted website to get the data and analyze the trend of resell.
 
 ## Requirements
 
-$ pip install -r requirements.txt
-$
+``` pip install -r requirements.txt```
 
 You need to download the driver for your browser and put it in a driver folder.
 
